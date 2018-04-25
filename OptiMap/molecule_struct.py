@@ -1,5 +1,5 @@
-from OptiAsm import *
-from Photo_map import database as db
+from OptiMap import *
+from OptiScan import database as db
 """
 The class here is intended to store single OM molecule attributes.
 """
