@@ -41,51 +41,34 @@ class CorrelationStruct:
         self.long_overlap = [None, None]
         self.new_short = None
         self.new_long = None
-        self.secondary_score = None
 
-
-    def re_correlate_with_original(self):
-        if self.status:
-            #### Here make a numba function to correlate only the overlapping part found by previous correlation
-            ### for this, find out the short and apply the zoom. take the overlap dot products and normalize
-            ### record the outcome to secondary score
-            pass
-        else:
-            return None
-
-    def correlate_with_zoom(self, zoom_range: (float, float), log: bool):
+    def correlate_with_zoom(self, zoom_range: (float, float)):
         assert not self.status
         if not self.fit_for_cross:
             self.max_score = 0
             return None
         self.status = True
         scores = list()
-        if log:
-            long_signal = self.long_molecule.log_signal
-            short_signal = self.short_molecule.log_signal
-        else:
-            long_signal = self.long_molecule.nick_signal
-            short_signal = self.short_molecule.nick_signal
 
         for zoomed_signal, zoomed_signal_flipped, zoom in generate_stretched_signals(zoom_range,
-                                                                                     short_signal,
+                                                                                     self.short_molecule.nick_signal,
                                                                                      step=0.001):
-            if zoomed_signal.shape[0] > long_signal.shape[0]:
+            if zoomed_signal.shape[0] > self.long_molecule.nick_signal.shape[0]:
                 short_change = True
-                _long = zoomed_signal
-                short = long_signal
+                long = zoomed_signal
+                short = self.long_molecule.nick_signal
             else:
                 short_change = False
                 short = zoomed_signal
-                _long = long_signal
+                long = self.long_molecule.nick_signal
 
-            full_corr = cr.normed_xcorr_no_means(_long, short, min_len=self.minimum_overlap_length).base
-            full_corr_flipped = cr.normed_xcorr_no_means(_long, short[::-1], min_len=self.minimum_overlap_length).base
+            full_corr = cr.normed_xcorr_no_means(long, short, min_len=self.minimum_overlap_length).base
+            full_corr_flipped = cr.normed_xcorr_no_means(long, short[::-1], min_len=self.minimum_overlap_length).base
 
             scores.append((np.max(full_corr), np.argmax(full_corr), zoom, full_corr, False, short_change,
-                           short, _long))
+                           short, long))
             scores.append((np.max(full_corr_flipped), np.argmax(full_corr_flipped), zoom, full_corr_flipped, True,
-                           short_change, short[::-1], _long))
+                           short_change, short[::-1], long))
 
         self.max_score, self.max_index, self.zoom, self.correlation, self.reversed, self.short_change, self.new_short, self.new_long = max(scores, key=max_function)
 
@@ -111,7 +94,6 @@ class CorrelationStruct:
                 self.long_id = False
             else:
                 self.long_id = True
-        self.re_correlate_with_original()
 
     def set_minimum_overlaps(self, minimum_nick_number: int):
         return np.max([self.short_molecule.nick_coordinates[minimum_nick_number],

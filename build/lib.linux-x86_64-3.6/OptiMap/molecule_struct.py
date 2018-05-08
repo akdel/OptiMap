@@ -1,5 +1,5 @@
-from OptiMap import *
-from OptiScan import database as db
+from OptiAsm import *
+from Photo_map import database as db
 """
 The class here is intended to store single OM molecule attributes.
 """
@@ -10,12 +10,10 @@ class Molecule:
     Each molecule is initiated and explained with this class.
     """
     def __init__(self, nick_signal: np.ndarray, backbone_signal: np.ndarray, snr: float,
-                 signal_filter=lambda x, y: (x, y), nick_filter=lambda x: True, log_snr=1.3):
+                 signal_filter=lambda x, y: (x, y), nick_filter=lambda x: True):
         assert nick_signal.shape == backbone_signal.shape
         self.nick_signal = nick_signal
         self.backbone_signal = backbone_signal
-        self.log_signal = None
-        self.record_log_signal(log_snr)
 
         self.quality = True
         self.median = float(np.median(nick_signal))
@@ -36,11 +34,6 @@ class Molecule:
 
     def filter_signal_pairs(self, func=lambda x, y: (x, y)):
         self.nick_signal, self.backbone_signal = func(self.nick_signal, self.backbone_signal)
-
-    def record_log_signal(self, snr: float):
-        log_mol = np.log1p(self.nick_signal)
-        median = np.median(self.nick_signal)
-        self.log_signal = np.where(log_mol > snr*median, log_mol, 0)
 
 
 class MoleculeNoBack(Molecule):
