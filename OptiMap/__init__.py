@@ -1,4 +1,7 @@
-from Photo_map import scan, database, utils
+try:
+    from OptiScan import scan, database, utils
+except ImportError:
+    raise Warning("Some OptiMap functionalities require OptiScan.")
 import numpy as np
 import numba as nb
 

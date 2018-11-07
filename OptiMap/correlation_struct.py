@@ -1,12 +1,8 @@
-#from OptiMap import numpycorr as nc
-# import cross_corr as cr
 from OptiMap import *
 from OptiMap import molecule_struct as ms
 from OptiMap.align import normalized_correlation as cr
 import multiprocessing as mp
 from scipy import ndimage
-
-
 
 class CorrelationStruct:
     def __init__(self, molecule_1: ms.Molecule, molecule_2: ms.Molecule, minimum_nick_number=9, bylength=False):
@@ -134,7 +130,7 @@ def create_pairwise_structs_in_db(database_name: str, snr=6):
             if pair_ids[0] != pair_ids[1] and pair_ids[0] < pair_ids[1]:
                 corr = CorrelationStruct(molecule_1, molecule_2)
                 if corr.fit_for_cross:
-                    corr.correlate_with_zoom((0.98, 1.02))
+                    corr.correlate_with_zoom((0.98, 1.02), log=False)
                     yield corr, tuple(pair_ids)
 
 
@@ -148,7 +144,7 @@ def create_pairwise_structs_from_npfile(filename: str, snr=6.):
             if pair_ids[0] != pair_ids[1] and pair_ids[0] < pair_ids[1]:
                 corr = CorrelationStruct(molecule_1, molecule_2)
                 if corr.fit_for_cross:
-                    corr.correlate_with_zoom((0.98, 1.02))
+                    corr.correlate_with_zoom((0.98, 1.02), log=False)
                     yield corr, tuple(pair_ids)
 
 
@@ -162,7 +158,7 @@ def create_pairwise_structs_from_arrays(signal_list, snr=6.):
             if pair_ids[0] != pair_ids[1] and pair_ids[0] < pair_ids[1]:
                 corr = CorrelationStruct(molecule_1, molecule_2)
                 if corr.fit_for_cross:
-                    corr.correlate_with_zoom((0.98, 1.02))
+                    corr.correlate_with_zoom((0.98, 1.02), log=False)
                     yield corr, tuple(pair_ids)
 
 
@@ -172,7 +168,7 @@ def create_one_vs_all_structs(single_signal: ms.MoleculeNoBack, molecule_stream:
         pair_ids[1] += 1
         corr = CorrelationStruct(single_signal, molecule)
         if corr.fit_for_cross:
-            corr.correlate_with_zoom((0.98, 1.02))
+            corr.correlate_with_zoom((0.98, 1.02), log=False)
             yield corr, tuple(pair_ids)
 
 
