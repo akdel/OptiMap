@@ -1,5 +1,6 @@
 from OptiMap import *
 from OptiScan import database as db
+from OptiMap.correlation_struct import EPSILON
 """
 The class here is intended to store single OM molecule attributes.
 """
@@ -38,9 +39,9 @@ class Molecule:
         self.nick_signal, self.backbone_signal = func(self.nick_signal, self.backbone_signal)
 
     def record_log_signal(self, snr: float):
-        log_mol = np.log1p(self.nick_signal)
+        log_mol = np.log1p(self.nick_signal) + EPSILON
         median = np.median(self.nick_signal)
-        self.log_signal = np.where(log_mol > snr*median, log_mol, 0)
+        self.log_signal = np.where(log_mol > snr*median, log_mol, EPSILON)
 
 
 class MoleculeNoBack(Molecule):
