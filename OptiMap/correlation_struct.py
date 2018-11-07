@@ -60,8 +60,8 @@ class CorrelationStruct:
         self.status = True
         scores = list()
         if log:
-            long_signal = self.long_molecule.log_signal + EPSILON
-            short_signal = self.short_molecule.log_signal + EPSILON
+            long_signal = self.long_molecule.log_signal 
+            short_signal = self.short_molecule.log_signal
         else:
             long_signal = self.long_molecule.nick_signal + EPSILON
             short_signal = self.short_molecule.nick_signal + EPSILON
