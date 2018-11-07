@@ -4,6 +4,8 @@ from OptiMap.align import normalized_correlation as cr
 import multiprocessing as mp
 from scipy import ndimage
 
+EPSILON = 0.0000001
+
 class CorrelationStruct:
     def __init__(self, molecule_1: ms.Molecule, molecule_2: ms.Molecule, minimum_nick_number=9, bylength=False):
         self.long_id = True
@@ -58,11 +60,11 @@ class CorrelationStruct:
         self.status = True
         scores = list()
         if log:
-            long_signal = self.long_molecule.log_signal
-            short_signal = self.short_molecule.log_signal
+            long_signal = self.long_molecule.log_signal + EPSILON
+            short_signal = self.short_molecule.log_signal + EPSILON
         else:
-            long_signal = self.long_molecule.nick_signal
-            short_signal = self.short_molecule.nick_signal
+            long_signal = self.long_molecule.nick_signal + EPSILON
+            short_signal = self.short_molecule.nick_signal + EPSILON
 
         for zoomed_signal, zoomed_signal_flipped, zoom in generate_stretched_signals(zoom_range,
                                                                                      short_signal,
