@@ -39,7 +39,7 @@ class Molecule:
         self.nick_signal, self.backbone_signal = func(self.nick_signal, self.backbone_signal)
 
     def record_log_signal(self, snr: float):
-        log_mol = np.log1p(self.nick_signal)
+        log_mol = np.nan_to_num(np.log1p(self.nick_signal))
         median = np.median(log_mol)
         self.log_signal = np.where(log_mol > snr*median, log_mol, EPSILON)
 
