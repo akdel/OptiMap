@@ -76,8 +76,8 @@ class CorrelationStruct:
                 short = zoomed_signal
                 _long = long_signal
 
-            full_corr = cr.normed_xcorr_no_means(_long, short, min_len=self.minimum_overlap_length).base
-            full_corr_flipped = cr.normed_xcorr_no_means(_long, short[::-1], min_len=self.minimum_overlap_length).base
+            full_corr = cr(_long, short, limit=self.minimum_overlap_length).base
+            full_corr_flipped = cr(_long, short[::-1], limit=self.minimum_overlap_length).base
 
             scores.append((np.max(full_corr), np.argmax(full_corr), zoom, full_corr, False, short_change,
                            short, _long))
