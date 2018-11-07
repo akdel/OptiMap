@@ -4,8 +4,6 @@ from OptiMap.align import normalized_correlation as cr
 import multiprocessing as mp
 from scipy import ndimage
 
-EPSILON = 0.0000001
-
 class CorrelationStruct:
     def __init__(self, molecule_1: ms.Molecule, molecule_2: ms.Molecule, minimum_nick_number=9, bylength=False):
         self.long_id = True

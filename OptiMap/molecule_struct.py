@@ -1,6 +1,5 @@
 from OptiMap import *
 from OptiScan import database as db
-from OptiMap.correlation_struct import EPSILON
 """
 The class here is intended to store single OM molecule attributes.
 """
