@@ -1,7 +1,8 @@
 #from OptiMap import numpycorr as nc
-import cross_corr as cr
+# import cross_corr as cr
 from OptiMap import *
 from OptiMap import molecule_struct as ms
+from OptiMap.align import normalized_correlation as cr
 import multiprocessing as mp
 from scipy import ndimage
 
