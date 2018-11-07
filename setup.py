@@ -10,5 +10,5 @@ setup(name='OptiMap',
       url='https://gitlab.com/akdel/',
       packages=['OptiMap'],
       install_requires=["sqlalchemy", "numpy", "scipy", "intervaltree", "matplotlib", "cython"],
-      ext_modules=cythonize("cross_corr.pyx"),
+      # ext_modules=cythonize("cross_corr.pyx"),
       include_dirs=[numpy.get_include()])
