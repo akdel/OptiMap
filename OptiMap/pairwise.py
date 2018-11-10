@@ -3,34 +3,16 @@ import numba as nb
 from math import sqrt
 
 
-"""
-## Pairwise cross-correlation
-The idea is to do the fft and ifft in numpy and the rest in parallel with numba.
-The most efficient way seems to be processing of molecules one versus all manner. This
-way we can also fit everything into the memory and paralelize by using numba.
-
-This main function (section_vs_section) should do these:
-1. Make an FFT array and a reverse FFT array of molecules. (numpy)
-2. Take a group of molecules and multiply versus all others. (numba in parallel)
-3. Take the ifft of the result. (numpy)
-4. Take max and normalize array. (numba in parallel)
-5. Argsort and write the top results into the a results matrix. (numba in parallel)
-"""
-
-
 def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
     results = np.zeros((number_of_molecules, top), dtype=np.float64)
     for i in range(section1[0], section1[1], width):
-        print("from %s to %s" % (i, i + width))
         subject_molecules = fft_molecules[i:i+width]
         rev_subject_molecules = fft_rev_molecules[i:i+width]
         multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, fft_molecules)        
         mol_range = np.arange(i, i + width)
         normalized_top_corrs = np.zeros(multiple_top_corrs.shape)
-        print(normalized_top_corrs[:10,:10])
         numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, mol_range, normalized_top_corrs)
-        print(normalized_top_corrs[:10,:10])
         del multiple_top_corrs, mol_range
         numba_arg_sort(normalized_top_corrs, results[i:i+width], top)
     return results
