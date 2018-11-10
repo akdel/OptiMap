@@ -7,6 +7,14 @@ def clip_by_fft(mol, reduce_by=0.3):
     orig = orig[:int(-orig.shape[0]*reduce_by)]
     return np.fft.ifft(orig).real
 
+def create_forward_fft(mols, max_len=512):
+    fft_mols = np.zeros((len(mols), max_len*2))
+    fft_mols_rev = np.zeros((len(mols), max_len*2))
+    for i in range(len(mols)):
+        fft_mols[i,:mols[i].shape[0]] = mols[i]
+        fft_mols_rev[i,:mols[i].shape[0]] = mols[i][::-1]
+    return np.fft.fft(fft_mols), np.fft.fft(fft_mols_rev)
+
 def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
     results = np.zeros((number_of_molecules, top), dtype=np.float64)
