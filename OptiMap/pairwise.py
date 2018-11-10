@@ -20,14 +20,13 @@ def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=
 
 def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules):
     multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=float)
+    fft_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
+    corr_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=float)
+    corr_maxes = np.zeros(fft_molecules.shape[0])
     for i in range(fft_subject_molecules.shape[0]):
-        fft_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
         numba_get_products(fft_subject_molecules[i], fft_subject_rev_molecules[i], fft_molecules, fft_products)
-        corr_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=float)
-        corr_products[0] = np.fft.ifft(fft_products[0])
-        corr_products[1] = np.fft.ifft(fft_products[1])
-        del fft_products
-        corr_maxes = np.zeros(fft_molecules.shape[0])
+        corr_products[0] = np.fft.ifft(fft_products[0]).real
+        corr_products[1] = np.fft.ifft(fft_products[1]).real
         numba_get_corr_maxes(corr_products, corr_maxes)
         multiple_corr_maxes[i,:] = corr_maxes
     return multiple_corr_maxes
