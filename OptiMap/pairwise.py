@@ -16,15 +16,12 @@ def create_forward_fft(mols, max_len=512):
     return np.fft.fft(fft_mols), np.fft.fft(fft_mols_rev)
 
 def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
-    import matplotlib.pyplot as plt
     number_of_molecules, length = fft_molecules.shape
     results = np.zeros((number_of_molecules, top), dtype=np.float64)
     for i in range(section1[0], section1[1], width):
         subject_molecules = fft_molecules[i:i+width]
         rev_subject_molecules = fft_rev_molecules[i:i+width]
         multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, fft_molecules)
-        plt.imshow(multiple_top_corrs)
-        break
         mol_range = np.arange(i, i + width)
         normalized_top_corrs = np.zeros(multiple_top_corrs.shape)
         numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, mol_range, normalized_top_corrs)
