@@ -18,9 +18,6 @@ This main function (section_vs_section) should do these:
 """
 
 
-def prepare_fft_molecules(molecules, fft_compression_ratio=0.3):
-    pass
-
 def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
     results = np.zeros((number_of_molecules, top), dtype=np.float64)
