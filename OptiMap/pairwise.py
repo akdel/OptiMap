@@ -23,11 +23,11 @@ def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=
         subject_molecules = fft_molecules[i:i+width]
         rev_subject_molecules = fft_rev_molecules[i:i+width]
         multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, fft_molecules)
+        plt.imshow(multiple_top_corrs)
+        break
         mol_range = np.arange(i, i + width)
         normalized_top_corrs = np.zeros(multiple_top_corrs.shape)
         numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, mol_range, normalized_top_corrs)
-        plt.imshow(normalized_top_corrs)
-        break
         del multiple_top_corrs, mol_range
         numba_arg_sort(normalized_top_corrs, results[i:i+width], top)
     return results
