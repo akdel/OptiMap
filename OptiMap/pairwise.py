@@ -49,9 +49,9 @@ def numba_get_products(fft_subject, fft_subject_rev, fft_molecules, fft_products
         numba_product(fft_products[1][i], fft_subject, fft_molecules[i])
 
 
-@nb.njit(parallel=True, fastmath=True)
+@nb.njit(fastmath=True)
 def numba_product(res, a1, a2):
-    for i in nb.prange(res.shape[0]):
+    for i in range(res.shape[0]):
         res[i] = a1[i] * a2[i]
 
 def numpy_ifft(fft_products):
