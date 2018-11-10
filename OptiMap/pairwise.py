@@ -6,12 +6,12 @@ from math import sqrt
 def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
     results = np.zeros((number_of_molecules, top), dtype=np.float64)
-    normalized_top_corrs = np.zeros((width, number_of_molecules))
     for i in range(section1[0], section1[1], width):
         subject_molecules = fft_molecules[i:i+width]
         rev_subject_molecules = fft_rev_molecules[i:i+width]
         multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, fft_molecules)        
         mol_range = np.arange(i, i + width)
+        normalized_top_corrs = np.zeros(multiple_top_corrs.shape)
         numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, mol_range, normalized_top_corrs)
         del multiple_top_corrs, mol_range
         numba_arg_sort(normalized_top_corrs, results[i:i+width], top)
