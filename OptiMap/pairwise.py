@@ -42,7 +42,7 @@ def numba_get_corr_maxes(corr_products, corr_maxes):
         corr_maxes[i] = current_max + difference
 
 
-@nb.njit
+@nb.njit(parallel=True)
 def numba_get_products(fft_subject, fft_subject_rev, fft_molecules, fft_products):
     for i in range(fft_molecules.shape[0]):
         numba_product(fft_products[0][i], fft_subject, fft_molecules[i])
