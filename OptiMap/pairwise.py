@@ -5,7 +5,7 @@ from math import sqrt
 def clip_by_fft(mol, reduce_by=0.3):
     orig = np.fft.fft(mol)
     orig = orig[:int(-orig.shape[0]*reduce_by)]
-    return np.fft.ifft(orig.real)
+    return np.fft.ifft(orig).real
 
 def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
