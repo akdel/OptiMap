@@ -89,7 +89,7 @@ def numba_normalize_molecule_correlation_array(correlation_array, maxes, mol_ran
 def numba_normalize_single_array(single_array, result_array, maxes, current_mol):
     current_max = maxes[current_mol]
     for i in range(maxes.shape[0]):
-        result_array[i] = single_array[i]/sqrt(current_max * maxes[i])
+        result_array[i] = single_array[i]#/sqrt(current_max * maxes[i])
 
 
 if __name__ == "__main__":
