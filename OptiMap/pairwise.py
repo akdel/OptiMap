@@ -6,20 +6,19 @@ from math import sqrt
 def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
     results = np.zeros((number_of_molecules, top), dtype=np.float64)
+    multiple_top_corrs = np.zeros((width, number_of_molecules))
+    normalized_top_corrs = np.zeros((width, number_of_molecules))
     for i in range(section1[0], section1[1], width):
         subject_molecules = fft_molecules[i:i+width]
         rev_subject_molecules = fft_rev_molecules[i:i+width]
-        multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, fft_molecules)        
+        get_multiple_products(subject_molecules, rev_subject_molecules, fft_molecules, multiple_top_corrs)        
         mol_range = np.arange(i, i + width)
-        normalized_top_corrs = np.zeros(multiple_top_corrs.shape)
         numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, mol_range, normalized_top_corrs)
-        del multiple_top_corrs, mol_range
         numba_arg_sort(normalized_top_corrs, results[i:i+width], top)
     return results
 
 
-def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules):
-    multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=float)
+def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules, multiple_corr_maxes):
     for i in range(fft_subject_molecules.shape[0]):
         fft_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
         numba_get_products(fft_subject_molecules[i], fft_subject_rev_molecules[i], fft_molecules, fft_products)
@@ -30,7 +29,6 @@ def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_
         corr_maxes = np.zeros(fft_molecules.shape[0])
         numba_get_corr_maxes(corr_products, corr_maxes)
         multiple_corr_maxes[i,:] = corr_maxes
-    return multiple_corr_maxes
 
 
 @nb.njit(parallel=True)
