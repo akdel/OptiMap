@@ -15,18 +15,16 @@ def create_forward_fft(mols, max_len=512):
         fft_mols_rev[i,:mols[i].shape[0]] = mols[i][::-1]
     return np.fft.fft(fft_mols), np.fft.fft(fft_mols_rev)
 
-def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
+def section_vs_section(section1, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
     results = np.zeros((number_of_molecules, top), dtype=np.float64)
-    db_molecules = fft_molecules[section2[0]:section2[1]]
-    section2 = np.array(section2).astype(int)
     for i in range(section1[0], section1[1], width):
         subject_molecules = fft_molecules[i:i+width]
         rev_subject_molecules = fft_rev_molecules[i:i+width]
-        multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, db_molecules)
+        multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, fft_molecules)
         mol_range = np.arange(i, i + width)
         normalized_top_corrs = np.zeros(multiple_top_corrs.shape)
-        numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, section2, mol_range, normalized_top_corrs)
+        numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, mol_range, normalized_top_corrs)
         del multiple_top_corrs, mol_range
         numba_arg_sort(normalized_top_corrs, results[i:i+width], top)
     return results
@@ -79,17 +77,16 @@ def numba_arg_sort(correlation_scores, results_array, limit):
 
 
 @nb.njit(parallel=True)
-def numba_normalize_molecule_correlation_array(correlation_array, maxes, max_range, mol_range, normalized_array):
+def numba_normalize_molecule_correlation_array(correlation_array, maxes, mol_range, normalized_array):
     for i in nb.prange(correlation_array.shape[0]):
-        numba_normalize_single_array(correlation_array[i], normalized_array[i], max_range, maxes, mol_range[i])
+        numba_normalize_single_array(correlation_array[i], normalized_array[i], maxes, mol_range[i])
 
 
 @nb.njit
-def numba_normalize_single_array(single_array, result_array, max_range, maxes, current_mol):
+def numba_normalize_single_array(single_array, result_array, maxes, current_mol):
     current_max = maxes[current_mol]
-    max_segment = maxes[max_range[0]:max_range[1]]
-    for i in range(max_segment.shape[0]):
-        result_array[i] = single_array[i]/sqrt(current_max * max_segment[i])
+    for i in range(maxes.shape[0]):
+        result_array[i] = single_array[i]/sqrt(current_max * maxes[i])
 
 
 if __name__ == "__main__":
@@ -98,5 +95,5 @@ if __name__ == "__main__":
     rev_fft_molecules = np.fft.fft(molecules)
     maxes = np.array([np.sum(x**2) for x in molecules])
     print(
-        section_vs_section((0,10), (0, 10), fft_molecules, rev_fft_molecules, maxes, width=10, top=5)
+        section_vs_section((0,10), fft_molecules, rev_fft_molecules, maxes, width=10, top=5)
     )
