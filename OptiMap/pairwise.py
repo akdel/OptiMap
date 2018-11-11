@@ -82,12 +82,11 @@ def numba_arg_sort(correlation_scores, results_array, limit):
 def numba_normalize_molecule_correlation_array(correlation_array, maxes, max_range, mol_range, normalized_array):
     max_segment = maxes[max_range[0]:max_range[1]]
     for i in nb.prange(correlation_array.shape[0]):
-        numba_normalize_single_array(correlation_array[i], normalized_array[i], max_segment, mol_range[i])
+        numba_normalize_single_array(correlation_array[i], normalized_array[i], max_segment, maxes[mol_range[i]])
 
 
 @nb.njit
-def numba_normalize_single_array(single_array, result_array, maxes, current_mol):
-    current_max = maxes[current_mol]
+def numba_normalize_single_array(single_array, result_array, maxes, current_max):
     for i in range(maxes.shape[0]):
         result_array[i] = single_array[i]/sqrt(current_max * maxes[i])
 
