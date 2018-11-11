@@ -18,7 +18,7 @@ def create_forward_fft(mols, max_len=512):
 def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
     results = np.zeros((number_of_molecules, top), dtype=np.float64)
-    section2 = np.array(section2).astype(int)
+    section2 = np.array(list(section2)).astype(int)
     db_molecules = fft_molecules[section2[0]:section2[1]]
     for i in range(section1[0], section1[1], width):
         subject_molecules = fft_molecules[i:i+width]
