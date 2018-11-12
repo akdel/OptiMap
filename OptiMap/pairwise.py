@@ -39,7 +39,7 @@ def create_and_link_paired_matrices(period, fft_molecules, fft_rev_molecules, ma
     for i in range(0, number_of_molecules - (period*2), period):
         current_section1 = (i, i + period)
         current_section2 = (i + period, i + (2 * period))
-        argsorted = section_vs_section(current_section1, current_section2, fft_molecules, fft_rev_molecules, maxes, width=width, top=top)
+        argsorted = section_vs_section(current_section1, current_section2, fft_molecules, fft_rev_molecules, maxes, width=width, top=top).astype(int)
         pair_sets.append(from_argsort_to_pairs(argsorted, current_section1))
         del argsorted
     return merge_and_extend_pairs(pair_sets, depth=depth)
