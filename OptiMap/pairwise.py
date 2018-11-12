@@ -29,7 +29,7 @@ def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, max
         normalized_top_corrs = np.zeros(multiple_top_corrs.shape)
         numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, section2, mol_range, normalized_top_corrs)
         del multiple_top_corrs, mol_range
-        numba_arg_sort(normalized_top_corrs, results[i:i+width], top)
+        numba_arg_sort(normalized_top_corrs, results[i:i+width], top, int(section2[0]))
     return results[section1[0]:section1[1]]
 
 
@@ -87,9 +87,9 @@ def numpy_ifft(fft_products):
 
 
 @nb.njit(parallel=True)
-def numba_arg_sort(correlation_scores, results_array, limit):
+def numba_arg_sort(correlation_scores, results_array, limit, shift):
     for i in nb.prange(correlation_scores.shape[0]):
-        results_array[i] = np.argsort(correlation_scores[i])[::-1][:limit]
+        results_array[i] = np.argsort(correlation_scores[i])[::-1][:limit] + shift
 
 
 @nb.njit(parallel=True)
@@ -124,6 +124,7 @@ def merge_and_extend_pairs(pair_sets, depth=1):
     set_graph = au.set_graph_from_edges(all_pairs)
     print(len(list(set_graph.keys())))
     extended_graph = au.increase_graph_density_extender(set_graph, depth=depth)
+    print(len(list(extended_graph.keys())))
     extended_pairs = au.get_pairs_from_graph(extended_graph)
     print("number of all pairs after merging: ", len(extended_pairs))
     return au.get_pairs_from_graph(extended_graph)
