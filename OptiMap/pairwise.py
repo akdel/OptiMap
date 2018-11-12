@@ -31,6 +31,7 @@ def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, max
         numba_arg_sort(normalized_top_corrs, results[i:i+width], top)
     return results
 
+
 @nb.jit
 def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules):
     multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=float)
@@ -89,6 +90,16 @@ def numba_normalize_molecule_correlation_array(correlation_array, maxes, max_ran
 def numba_normalize_single_array(single_array, result_array, maxes, current_max):
     for i in range(maxes.shape[0]):
         result_array[i] = single_array[i]/sqrt(current_max * maxes[i])
+
+
+def from_argsort_to_pairs(argsorted, section1):
+    pairs = set()
+    start_query = section1[0]
+    for i in range(argsorted.shape[0]):
+        query_id = i + start_query
+        for j in range(argsorted.shape[1]):
+            pairs.add(tuple(sorted([query_id, argsorted[i,j]])))
+    return pairs
 
 
 if __name__ == "__main__":
