@@ -122,6 +122,7 @@ def merge_and_extend_pairs(pair_sets, depth=1):
         all_pairs += list(pair_set)
     print("number of all pairs before merging: ", len(all_pairs))
     set_graph = au.set_graph_from_edges(all_pairs)
+    print(len(list(set_graph.keys())))
     extended_graph = au.increase_graph_density_extender(set_graph, depth=depth)
     extended_pairs = au.get_pairs_from_graph(extended_graph)
     print("number of all pairs after merging: ", len(extended_pairs))
