@@ -1,6 +1,7 @@
 import numpy as np
 import numba as nb
 from math import sqrt
+from OptiAsm import assembly_utils as au
 
 def clip_by_fft(mol, reduce_by=0.3):
     orig = np.fft.fft(mol)
@@ -100,6 +101,14 @@ def from_argsort_to_pairs(argsorted, section1):
         for j in range(argsorted.shape[1]):
             pairs.add(tuple(sorted([query_id, argsorted[i,j]])))
     return pairs
+
+
+def merge_and_extend_pairs(pair_sets, depth=1):
+    all_pairs = []
+    for pair_set in pair_sets:
+        all_pairs += list(pair_set)
+    set_graph = au.set_graph_from_edges(all_pairs)
+    return au.increase_graph_density_extender(set_graph, depth=depth)
 
 
 if __name__ == "__main__":
