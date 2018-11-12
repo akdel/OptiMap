@@ -30,7 +30,19 @@ def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, max
         numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, section2, mol_range, normalized_top_corrs)
         del multiple_top_corrs, mol_range
         numba_arg_sort(normalized_top_corrs, results[i:i+width], top)
-    return results
+    return results[section1[0]:section1[1]]
+
+
+def create_and_link_paired_matrices(period, fft_molecules, fft_rev_molecules, maxes, width=40, top=10, depth=1):
+    number_of_molecules, length = fft_molecules.shape
+    pair_sets = list()
+    for i in range(0, number_of_molecules - (period*2), period):
+        current_section1 = (i, i + period)
+        current_section2 = (i + period, i + (2 * period))
+        argsorted = section_vs_section(current_section1, current_section2, fft_molecules, fft_rev_molecules, maxes, width=width, top=top)
+        pair_sets.append(from_argsort_to_pairs(argsorted, current_section1))
+        del argsorted
+    return merge_and_extend_pairs(pair_sets, depth=depth)
 
 
 @nb.jit
@@ -100,6 +112,7 @@ def from_argsort_to_pairs(argsorted, section1):
         query_id = i + start_query
         for j in range(argsorted.shape[1]):
             pairs.add(tuple(sorted([query_id, argsorted[i,j]])))
+    print("number of pairs found for section", section1, "is: ", len(pairs))
     return pairs
 
 
@@ -107,8 +120,12 @@ def merge_and_extend_pairs(pair_sets, depth=1):
     all_pairs = []
     for pair_set in pair_sets:
         all_pairs += list(pair_set)
+    print("number of all pairs before merging: ", len(all_pairs))
     set_graph = au.set_graph_from_edges(all_pairs)
-    return au.increase_graph_density_extender(set_graph, depth=depth)
+    extended_graph = au.increase_graph_density_extender(set_graph, depth=depth)
+    extended_pairs = au.get_pairs_from_graph(extended_graph)
+    print("number of all pairs after merging: ", len(extended_pairs))
+    return au.get_pairs_from_graph(extended_graph)
 
 
 if __name__ == "__main__":
