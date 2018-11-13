@@ -49,7 +49,7 @@ def create_and_link_paired_matrices(period, fft_molecules, fft_rev_molecules, ma
     return merge_and_extend_pairs(pair_sets, depth=depth)
 
 
-# @nb.jit
+@nb.jit
 def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules):
     multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=float)
     fft_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
