@@ -140,10 +140,12 @@ def merge_and_extend_pairs(pair_sets, depth=1):
 
 def detect_repeat(nick_coordinates, diff_thr=1., num_thr=5):
     diff = np.abs(nick_coordinates[:-1] - nick_coordinates[1:])
-    if diff[diff <= diff_thr]:
+    if diff[diff <= diff_thr].shape[0] >= num_thr:
         return True
     else:
         return False
+
+
 
 if __name__ == "__main__":
     molecules = np.arange(1000*512).reshape((1000,512)).astype(float)
