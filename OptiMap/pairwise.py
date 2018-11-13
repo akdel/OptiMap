@@ -32,8 +32,6 @@ def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, max
         mol_range = np.arange(i, i + width)
         normalized_top_corrs = np.zeros(multiple_top_corrs.shape)
         numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, section2, mol_range, normalized_top_corrs)
-        print(multiple_top_corrs[:,:10])
-        print(normalized_top_corrs[:,:10])
         del multiple_top_corrs, mol_range
         numba_arg_sort(normalized_top_corrs, results[i:i+width], top, int(section2[0]))
     return results[section1[0]:section1[1]]
