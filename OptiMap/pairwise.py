@@ -141,7 +141,6 @@ def merge_and_extend_pairs(pair_sets, depth=1):
 def detect_repeat(nick_coordinates, diff_thr=1., num_thr=5):
     diff = np.abs(nick_coordinates[:-1] - nick_coordinates[1:])
     diff = np.abs(diff[:-1] - diff[1:])
-    print(diff)
     if diff[diff <= diff_thr].shape[0] >= num_thr:
         return True
     else:
