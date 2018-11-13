@@ -115,7 +115,11 @@ def from_argsort_to_pairs(argsorted, section1):
     for i in range(argsorted.shape[0]):
         query_id = i + start_query
         for j in range(argsorted.shape[1]):
-            pairs.add(tuple(sorted([query_id, argsorted[i,j]])))
+            current = argsorted[i,j]
+            if current != query_id:
+                pairs.add(tuple(sorted([query_id, argsorted[i,j]])))
+            else:
+                continue
     print("number of pairs found for section", section1, "is: ", len(pairs))
     return pairs
 
@@ -133,6 +137,13 @@ def merge_and_extend_pairs(pair_sets, depth=1):
     print("number of all pairs after merging: ", len(extended_pairs))
     return au.get_pairs_from_graph(extended_graph)
 
+
+def detect_repeat(nick_coordinates, diff_thr=1., num_thr=5):
+    diff = np.abs(nick_coordinates[:-1] - nick_coordinates[1:])
+    if diff[diff <= diff_thr]:
+        return True
+    else:
+        return False
 
 if __name__ == "__main__":
     molecules = np.arange(1000*512).reshape((1000,512)).astype(float)
