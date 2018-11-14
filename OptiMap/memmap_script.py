@@ -17,9 +17,9 @@ def find_maxes(memmap_file, length, width):
     return res
 
 
-def pipe_to_extract(memmap_file, maxes, top, width, number_of_mols):
-    sorted_array = np.zeros((number_of_mols, top))
-    for i in range(0, number_of_mols, width):
+def pipe_to_extract(memmap_file, maxes, top, width, number_of_mols, limit):
+    sorted_array = np.zeros((limit, top))
+    for i in range(0, limit, width):
         width_array = np.zeros((width, number_of_mols))
         start = i * (number_of_mols)
         stop = start + (width * number_of_mols)
