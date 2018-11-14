@@ -9,7 +9,7 @@ def find_maxes(memmap_file, length, width):
         print(start,start+width)
         start = i * (length)
         stop = start + (width * length)
-        memmap = get_memmap_width(memmap_file, i*length, (i+1)*length)
+        memmap = get_memmap_width(memmap_file, start, stop)
         mem = np.array(memmap).reshape((length, -1))
         del memmap
         res[i:i+width] = np.max(mem, axis=0)
