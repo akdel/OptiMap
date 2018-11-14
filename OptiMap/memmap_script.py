@@ -3,6 +3,13 @@ import numba as nb
 import OptiMap.pairwise as pairwise
 
 
+def find_maxes(memmap_file, length):
+    res = np.zeros(length)
+    for i in range(res.shape[0]):
+        mem = get_memmap_width(memmap_file, i*length, (i+1)*length)
+        res[i] = np.max(mem)
+        del mem
+
 def pipe_to_extract(memmap_file, maxes, top, width, number_of_mols):
     sorted_array = np.zeros((number_of_mols, top))
     for i in range(0, number_of_mols, width):
