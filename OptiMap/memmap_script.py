@@ -6,9 +6,9 @@ import OptiMap.pairwise as pairwise
 def find_maxes(memmap_file, length, width):
     res = np.zeros(length)
     for i in range(0, res.shape[0], width):
-        print(start,start+width)
         start = i * (length)
         stop = start + (width * length)
+        print(start,start+width)
         memmap = get_memmap_width(memmap_file, start, stop)
         mem = np.array(memmap).reshape((length, -1))
         del memmap
