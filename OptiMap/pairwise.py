@@ -44,7 +44,7 @@ def create_and_link_paired_matrices(period, fft_molecules, fft_rev_molecules, ma
         current_section1 = (i, i + period)
         current_section2 = (i + period, i + (2 * period))
         argsorted = section_vs_section(current_section1, current_section2, fft_molecules, fft_rev_molecules, maxes, width=width, top=top).astype(int)
-        pair_sets.append(from_argsort_to_pairs(argsorted, current_section1))
+        pair_sets.append(from_argsort_to_pairs(argsorted, current_section1, set()))
         del argsorted
     return merge_and_extend_pairs(pair_sets, depth=depth)
 
@@ -109,17 +109,20 @@ def numba_normalize_single_array(single_array, result_array, maxes, current_max)
         result_array[i] = single_array[i]/sqrt(current_max * maxes[i])
 
 
-def from_argsort_to_pairs(argsorted, section1):
+def from_argsort_to_pairs(argsorted, section1, black_list):
     pairs = set()
     start_query = section1[0]
     for i in range(argsorted.shape[0]):
-        query_id = i + start_query
-        for j in range(argsorted.shape[1]):
-            current = argsorted[i,j]
-            if current != query_id:
-                pairs.add(tuple(sorted([query_id, argsorted[i,j]])))
-            else:
-                continue
+        if i not in black_list:
+            query_id = i + start_query
+            for j in range(argsorted.shape[1]):
+                current = argsorted[i,j]
+                if current not in black_list and current != query_id:
+                    pairs.add(tuple(sorted([query_id, argsorted[i,j]])))
+                else:
+                    continue
+        else:
+            continue
     print("number of pairs found for section", section1, "is: ", len(pairs))
     return pairs
 
