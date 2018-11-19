@@ -5,7 +5,7 @@ import multiprocessing as mp
 from scipy import ndimage
 
 class CorrelationStruct:
-    def __init__(self, molecule_1: ms.Molecule, molecule_2: ms.Molecule, minimum_nick_number=9, bylength=False):
+    def __init__(self, molecule_1: ms.Molecule, molecule_2: ms.Molecule, minimum_nick_number=9, bylength=False, return_new_signals=True):
         self.long_id = True
         if molecule_1.nick_signal.shape[0] >= molecule_2.nick_signal.shape[0]:
             self.long_molecule = molecule_1
@@ -39,16 +39,19 @@ class CorrelationStruct:
         self.new_short = None
         self.new_long = None
         self.secondary_score = None
+        self.new_short_length = None
+        self.new_long_length = None
+        self.delete_signals = (not return_new_signals)
 
 
-    def re_correlate_with_original(self):
-        if self.status:
-            #### Here make a numba function to correlate only the overlapping part found by previous correlation
-            ### for this, find out the short and apply the zoom. take the overlap dot products and normalize
-            ### record the outcome to secondary score
-            pass
-        else:
-            return None
+    # def re_correlate_with_original(self):
+    #     if self.status:
+    #         #### Here make a numba function to correlate only the overlapping part found by previous correlation
+    #         ### for this, find out the short and apply the zoom. take the overlap dot products and normalize
+    #         ### record the outcome to secondary score
+    #         pass
+    #     else:
+    #         return None
 
     def correlate_with_zoom(self, zoom_range: (float, float), log: bool):
         assert not self.status
@@ -108,7 +111,15 @@ class CorrelationStruct:
                 self.long_id = False
             else:
                 self.long_id = True
-        self.re_correlate_with_original()
+        self.new_long_length = self.new_long.shape[0]
+        self.new_short_length = self.new_short.shape[0]
+        if self.delete_signals:
+            self.long_molecule = None 
+            self.short_molecule = None
+            del self.new_short, self.new_long
+        else:
+            pass
+        # self.re_correlate_with_original()
 
     def set_minimum_overlaps(self, minimum_nick_number: int):
         return np.max([self.short_molecule.nick_coordinates[minimum_nick_number],
