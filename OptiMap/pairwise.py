@@ -53,17 +53,19 @@ def create_and_link_paired_matrices(period, fft_molecules, fft_rev_molecules, ma
 # @nb.jit
 def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules):
     multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=float)
-    fft_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
+    # fft_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
+    fft_products1 = np.zeros((fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
+    fft_products2 = np.zeros((fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
     # corr_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=float)
     corr_maxes = np.zeros(fft_molecules.shape[0])
     for i in range(fft_subject_molecules.shape[0]):
         print("running numba_get_products")
-        numba_get_products(fft_subject_molecules[i], fft_subject_rev_molecules[i], fft_molecules, fft_products)
-        print("running ifft")
+        numba_get_products(fft_subject_molecules[i], fft_subject_rev_molecules[i], fft_molecules, fft_products1, fft_products2)
+        # print("running ifft")
         # corr_products[0] = np.fft.ifft(fft_products[0]).real
         # corr_products[1] = np.fft.ifft(fft_products[1]).real
-        print("running get_corr_maxes")
-        numba_get_corr_maxes(np.fft.ifft(fft_products[0]).real, np.fft.ifft(fft_products[1]).real, corr_maxes)
+        print("running get_corr_maxes and ifft")
+        numba_get_corr_maxes(np.fft.ifft(fft_products1).real, np.fft.ifft(fft_products2).real, corr_maxes)
         multiple_corr_maxes[i,:] = corr_maxes
     return multiple_corr_maxes
 
@@ -79,10 +81,10 @@ def numba_get_corr_maxes(corr_products1, corr_products2, corr_maxes):
 
 
 @nb.njit(parallel=True)
-def numba_get_products(fft_subject, fft_subject_rev, fft_molecules, fft_products):
+def numba_get_products(fft_subject, fft_subject_rev, fft_molecules, fft_products1, fft_products2):
     for i in nb.prange(fft_molecules.shape[0]):
-        numba_product(fft_products[0][i], fft_subject, fft_molecules[i])
-        numba_product(fft_products[1][i], fft_subject_rev, fft_molecules[i])
+        numba_product(fft_products1[i], fft_subject, fft_molecules[i])
+        numba_product(fft_products2[i], fft_subject_rev, fft_molecules[i])
 
 
 @nb.njit(fastmath=True)
