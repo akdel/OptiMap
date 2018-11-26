@@ -65,7 +65,7 @@ def create_and_link_paired_matrices(period, fft_molecules, fft_rev_molecules, ma
     return merge_and_extend_pairs(pair_sets, depth=depth)
 
 
-# @nb.jit
+@nb.jit
 def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules, multiple_corr_maxes, fft_products1, fft_products2, corr_maxes):
     for i in range(fft_subject_molecules.shape[0]):
         # print("running numba_get_products")
