@@ -26,19 +26,13 @@ def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, max
     results = np.zeros((number_of_molecules, top), dtype=np.float64)
     section2 = np.array(list(section2)).astype(int)
     db_molecules = fft_molecules[section2[0]:section2[1]]
-
-    multiple_corr_maxes = np.zeros((width, db_molecules.shape[0]), dtype=float)
-    fft_products1 = np.zeros((db_molecules.shape[0],db_molecules.shape[1]), dtype=complex)
-    fft_products2 = np.zeros((db_molecules.shape[0],db_molecules.shape[1]), dtype=complex)
-    corr_maxes = np.zeros(db_molecules.shape[0])
-
-
     for i in range(section1[0], section1[1], width):
         t = time.time()
         print(i)
+
         subject_molecules = fft_molecules[i:i+width]
         rev_subject_molecules = fft_rev_molecules[i:i+width]
-        multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, db_molecules, multiple_corr_maxes, fft_products1, fft_products2, corr_maxes)
+        multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, db_molecules)
         mol_range = np.arange(i, i + width)
         normalized_top_corrs = np.zeros(multiple_top_corrs.shape)
         numba_normalize_molecule_correlation_array(multiple_top_corrs, maxes, section2, mol_range, normalized_top_corrs)
@@ -60,16 +54,16 @@ def create_and_link_paired_matrices(period, fft_molecules, fft_rev_molecules, ma
     return merge_and_extend_pairs(pair_sets, depth=depth)
 
 
-@nb.jit
-def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules, multiple_corr_maxes, fft_products1, fft_products2, corr_maxes):
-    multiple_corr_maxes[:] = 0
-    fft_products1[:] = 0
-    fft_products2[:] = 0
-    corr_maxes[:] = 0
+# @nb.jit
+def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules):
+    multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=float)
+    fft_products1 = np.zeros((fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
+    fft_products2 = np.zeros((fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
+    corr_maxes = np.zeros(fft_molecules.shape[0])
     for i in range(fft_subject_molecules.shape[0]):
-        # print("running numba_get_products")
+        print("running numba_get_products")
         numba_get_products(fft_subject_molecules[i], fft_subject_rev_molecules[i], fft_molecules, fft_products1, fft_products2)
-        # print("running get_corr_maxes and ifft")
+        print("running get_corr_maxes and ifft")
         numba_get_corr_maxes(np.fft.ifft(fft_products1).real, np.fft.ifft(fft_products2).real, corr_maxes)
         multiple_corr_maxes[i,:] = corr_maxes
     return multiple_corr_maxes
