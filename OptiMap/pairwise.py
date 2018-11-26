@@ -158,7 +158,7 @@ def detect_repeat(nick_coordinates, diff_thr=1., num_thr=5):
 def run_section_for_all_vs_all(fft_molecules: np.ndarray, fft_rev_molecules: np.ndarray, maxes: np.ndarray, 
                                mol_range: (int, int), output_folder: str, file_prefix: str):
     file_name = file_prefix + ("_%s-%s.npy" % mol_range)
-    section = section_vs_section(mol_range, (0, fft_molecules.shape[0]), fft_molecules, fft_rev_molecules, maxes, width=1000, top=300)
+    section = section_vs_section(mol_range, (0, fft_molecules.shape[0]), fft_molecules, fft_rev_molecules, maxes, width=10, top=300)
     np.save(output_folder + file_name, section)
 
 
