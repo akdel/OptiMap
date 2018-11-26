@@ -18,11 +18,11 @@ def create_forward_fft(mols, max_len=512):
     for i in range(len(mols)):
         fft_mols[i,:mols[i].shape[0]] = mols[i]
         fft_mols_rev[i,:mols[i].shape[0]] = mols[i][::-1]
-    return np.fft.fft(fft_mols), np.fft.fft(fft_mols_rev)
+    return np.fft.fft(fft_mols).astype(np.complex64), np.fft.fft(fft_mols_rev).astype(np.complex64)
 
 def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
-    results = np.zeros((number_of_molecules, top), dtype=np.float64)
+    results = np.zeros((number_of_molecules, top), dtype=np.float32)
     section2 = np.array(list(section2)).astype(int)
     db_molecules = fft_molecules[section2[0]:section2[1]]
     for i in range(section1[0], section1[1], width):
@@ -52,9 +52,9 @@ def create_and_link_paired_matrices(period, fft_molecules, fft_rev_molecules, ma
 
 @nb.jit
 def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules):
-    multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=float)
-    fft_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
-    corr_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=float)
+    multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=np.float32)
+    fft_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=np.complex64)
+    corr_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=np.float32)
     corr_maxes = np.zeros(fft_molecules.shape[0])
     for i in range(fft_subject_molecules.shape[0]):
         numba_get_products(fft_subject_molecules[i], fft_subject_rev_molecules[i], fft_molecules, fft_products)
@@ -159,7 +159,7 @@ def run_section_for_all_vs_all(fft_molecules: np.ndarray, fft_rev_molecules: np.
 
 
 def run_fft_and_max_script_main(molecules: list):
-    maxes = np.array([np.dot(x, x) for x in molecules])
+    maxes = np.array([np.dot(x, x) for x in molecules], dtype=np.float32)
     fft_mols, fft_rev_mols = create_forward_fft(molecules, max_len=512)
     return fft_mols, fft_rev_mols, maxes
 
