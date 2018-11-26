@@ -68,8 +68,8 @@ def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_
 @nb.njit(parallel=True)
 def numba_get_corr_maxes(corr_products, corr_maxes):
     for i in nb.prange(corr_maxes.shape[0]):
-        max_forward = np.max(corr_products[0,i,:])
-        max_reverse = np.max(corr_products[1,i,:])
+        max_forward = max(corr_products[0,i,:])
+        max_reverse = max(corr_products[1,i,:])
         current_max = max(max_forward, max_reverse)
         difference = abs(max_forward - max_reverse)
         corr_maxes[i] = current_max + difference
