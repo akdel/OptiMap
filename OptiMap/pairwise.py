@@ -61,9 +61,9 @@ def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_
     fft_products2 = np.zeros((fft_molecules.shape[0],fft_molecules.shape[1]), dtype=complex)
     corr_maxes = np.zeros(fft_molecules.shape[0])
     for i in range(fft_subject_molecules.shape[0]):
-        print("running numba_get_products")
+        # print("running numba_get_products")
         numba_get_products(fft_subject_molecules[i], fft_subject_rev_molecules[i], fft_molecules, fft_products1, fft_products2)
-        print("running get_corr_maxes and ifft")
+        # print("running get_corr_maxes and ifft")
         numba_get_corr_maxes(np.fft.ifft(fft_products1).real, np.fft.ifft(fft_products2).real, corr_maxes)
         multiple_corr_maxes[i,:] = corr_maxes
     return multiple_corr_maxes
