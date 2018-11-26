@@ -19,7 +19,7 @@ def create_forward_fft(mols, max_len=512):
     for i in range(len(mols)):
         fft_mols[i,:mols[i].shape[0]] = mols[i]
         fft_mols_rev[i,:mols[i].shape[0]] = mols[i][::-1]
-    return np.fft.fft(fft_mols), np.fft.fft(fft_mols_rev)
+    return np.fft.fft(fft_mols).astype(np.complex64), np.fft.fft(fft_mols_rev).astype(np.complex64)
 
 def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, maxes, width=40, top=10):
     number_of_molecules, length = fft_molecules.shape
@@ -56,10 +56,10 @@ def create_and_link_paired_matrices(period, fft_molecules, fft_rev_molecules, ma
 
 # @nb.jit
 def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_molecules):
-    multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=float)
+    multiple_corr_maxes = np.zeros((fft_subject_molecules.shape[0], fft_molecules.shape[0]), dtype=np.float32)
     fft_products1 = np.zeros((fft_molecules.shape[0],fft_molecules.shape[1]), dtype=np.complex64)
     fft_products2 = np.zeros((fft_molecules.shape[0],fft_molecules.shape[1]), dtype=np.complex64)
-    corr_maxes = np.zeros(fft_molecules.shape[0], dtype=float)
+    corr_maxes = np.zeros(fft_molecules.shape[0], dtype=np.float32)
     for i in range(fft_subject_molecules.shape[0]):
         # print("running numba_get_products")
         numba_get_products(fft_subject_molecules[i], fft_subject_rev_molecules[i], fft_molecules, fft_products1, fft_products2)
