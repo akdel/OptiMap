@@ -26,6 +26,7 @@ def section_vs_section(section1, section2, fft_molecules, fft_rev_molecules, max
     section2 = np.array(list(section2)).astype(int)
     db_molecules = fft_molecules[section2[0]:section2[1]]
     for i in range(section1[0], section1[1], width):
+        print(i)
         subject_molecules = fft_molecules[i:i+width]
         rev_subject_molecules = fft_rev_molecules[i:i+width]
         multiple_top_corrs = get_multiple_products(subject_molecules, rev_subject_molecules, db_molecules)
@@ -153,7 +154,7 @@ def detect_repeat(nick_coordinates, diff_thr=1., num_thr=5):
 def run_section_for_all_vs_all(fft_molecules: np.ndarray, fft_rev_molecules: np.ndarray, maxes: np.ndarray, 
                                mol_range: (int, int), output_folder: str, file_prefix: str):
     file_name = file_prefix + "_%s.npy"
-    section = section_vs_section((0, fft_molecules.shape[0]), mol_range, fft_molecules, fft_rev_molecules, maxes, width=40, top=300)
+    section = section_vs_section(mol_range, (0, fft_molecules.shape[0]), fft_molecules, fft_rev_molecules, maxes, width=1, top=300)
     np.save(file_name, section)
 
 
