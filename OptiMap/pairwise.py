@@ -149,13 +149,31 @@ def detect_repeat(nick_coordinates, diff_thr=1., num_thr=5):
     else:
         return False
 
+def run_section_for_all_vs_all(fft_molecules: np.ndarray, fft_rev_molecules: np.ndarray, maxes: np.ndarray, 
+                               mol_range: (int, int), output_folder: str, file_prefix: str):
+    file_name = file_prefix + "_%s.npy"
+    section = section_vs_section(mol_range, (0, fft_molecules.shape[0]), fft_molecules, fft_rev_molecules, maxes, width=75, top=300)
+    np.save(file_name, section)
+
+def run_fft_and_max_script_main(molecules: list):
+    maxes = np.array([np.dot(x, x) for x in molecules])
+    fft_mols, fft_rev_mols = create_forward_fft(molecules, max_len=512)
+    return fft_mols, fft_rev_mols, maxes
 
 
 if __name__ == "__main__":
-    molecules = np.arange(1000*512).reshape((1000,512)).astype(float)
+    from sys import argv
+    molecule_path = argv[1]
+    _mol_range = (int(argv[2]), int(argv[3]))
+    _out_dir = argv[4]
+    _molecules = list(np.load(molecule_path))
+    _fft_mols, _fft_rev_mols, _maxes = run_fft_and_max_script_main(_molecules)
+    run_section_for_all_vs_all(_fft_mols, _fft_rev_mols, _maxes, _mol_range, _out_dir, "argsorted")
+
+    """molecules = np.arange(1000*512).reshape((1000,512)).astype(float)
     fft_molecules = np.fft.fft(molecules)
     rev_fft_molecules = np.fft.fft(molecules)
     maxes = np.array([np.sum(x**2) for x in molecules])
     print(
         section_vs_section((0,10), (0, 10), fft_molecules, rev_fft_molecules, maxes, width=10, top=5)
-    )
+    )"""
