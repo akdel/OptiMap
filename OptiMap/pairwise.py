@@ -149,11 +149,13 @@ def detect_repeat(nick_coordinates, diff_thr=1., num_thr=5):
     else:
         return False
 
+
 def run_section_for_all_vs_all(fft_molecules: np.ndarray, fft_rev_molecules: np.ndarray, maxes: np.ndarray, 
                                mol_range: (int, int), output_folder: str, file_prefix: str):
     file_name = file_prefix + "_%s.npy"
-    section = section_vs_section(mol_range, (0, fft_molecules.shape[0]), fft_molecules, fft_rev_molecules, maxes, width=75, top=300)
+    section = section_vs_section(mol_range, (0, fft_molecules.shape[0]), fft_molecules, fft_rev_molecules, maxes, width=3, top=300)
     np.save(file_name, section)
+
 
 def run_fft_and_max_script_main(molecules: list):
     maxes = np.array([np.dot(x, x) for x in molecules])
