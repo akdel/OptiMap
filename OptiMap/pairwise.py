@@ -171,6 +171,7 @@ if __name__ == "__main__":
     _out_dir = argv[4]
     _molecules = list(np.load(molecule_path))
     _fft_mols, _fft_rev_mols, _maxes = run_fft_and_max_script_main(_molecules)
+    del _molecules
     run_section_for_all_vs_all(_fft_mols, _fft_rev_mols, _maxes, _mol_range, _out_dir, "argsorted")
 
     """molecules = np.arange(1000*512).reshape((1000,512)).astype(float)
