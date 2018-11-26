@@ -57,9 +57,12 @@ def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_
     corr_products = np.zeros((2,fft_molecules.shape[0],fft_molecules.shape[1]), dtype=float)
     corr_maxes = np.zeros(fft_molecules.shape[0])
     for i in range(fft_subject_molecules.shape[0]):
+        print("running numba_get_products")
         numba_get_products(fft_subject_molecules[i], fft_subject_rev_molecules[i], fft_molecules, fft_products)
+        print("running ifft")
         corr_products[0] = np.fft.ifft(fft_products[0]).real
         corr_products[1] = np.fft.ifft(fft_products[1]).real
+        print("running get_corr_maxes")
         numba_get_corr_maxes(corr_products, corr_maxes)
         multiple_corr_maxes[i,:] = corr_maxes
     return multiple_corr_maxes
@@ -68,8 +71,8 @@ def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_
 @nb.njit(parallel=True)
 def numba_get_corr_maxes(corr_products, corr_maxes):
     for i in nb.prange(corr_maxes.shape[0]):
-        max_forward = max(corr_products[0,i,:])
-        max_reverse = max(corr_products[1,i,:])
+        max_forward = np.max(corr_products[0,i,:])
+        max_reverse = np.max(corr_products[1,i,:])
         current_max = max(max_forward, max_reverse)
         difference = abs(max_forward - max_reverse)
         corr_maxes[i] = current_max + difference
