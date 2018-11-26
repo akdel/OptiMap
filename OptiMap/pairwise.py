@@ -68,7 +68,7 @@ def get_multiple_products(fft_subject_molecules, fft_subject_rev_molecules, fft_
     return multiple_corr_maxes
 
 
-@nb.njit(parallel=False)
+@nb.njit(parallel=True)
 def numba_get_corr_maxes(corr_products, corr_maxes):
     for i in nb.prange(corr_maxes.shape[0]):
         max_forward = np.max(corr_products[0,i,:])
@@ -78,7 +78,7 @@ def numba_get_corr_maxes(corr_products, corr_maxes):
         corr_maxes[i] = current_max + difference
 
 
-@nb.njit(parallel=False)
+@nb.njit(parallel=True)
 def numba_get_products(fft_subject, fft_subject_rev, fft_molecules, fft_products):
     for i in nb.prange(fft_molecules.shape[0]):
         numba_product(fft_products[0][i], fft_subject, fft_molecules[i])
@@ -94,13 +94,13 @@ def numpy_ifft(fft_products):
     return np.fft.ifft(fft_products).astype(np.float64)
 
 
-@nb.njit(parallel=False)
+@nb.njit(parallel=True)
 def numba_arg_sort(correlation_scores, results_array, limit, shift):
     for i in nb.prange(correlation_scores.shape[0]):
         results_array[i] = np.argsort(correlation_scores[i])[::-1][:limit] + shift
 
 
-@nb.njit(parallel=False)
+@nb.njit(parallel=True)
 def numba_normalize_molecule_correlation_array(correlation_array, maxes, max_range, mol_range, normalized_array):
     max_segment = maxes[max_range[0]:max_range[1]]
     for i in nb.prange(correlation_array.shape[0]):
