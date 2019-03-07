@@ -4,6 +4,7 @@ from OptiMap.align import normalized_correlation as cr
 import multiprocessing as mp
 from scipy import ndimage
 
+
 class CorrelationStruct:
     def __init__(self, molecule_1: ms.Molecule, molecule_2: ms.Molecule, minimum_nick_number=9, bylength=False, return_new_signals=True):
         self.long_id = True
@@ -42,6 +43,8 @@ class CorrelationStruct:
         self.new_short_length = None
         self.new_long_length = None
         self.delete_signals = (not return_new_signals)
+        # self.new_long_orig = None
+        # self.new_short_orig = None
 
 
     # def re_correlate_with_original(self):
@@ -63,6 +66,8 @@ class CorrelationStruct:
         if log:
             long_signal = self.long_molecule.log_signal 
             short_signal = self.short_molecule.log_signal
+            # orig_long = self.long_molecule.nick_signal + EPSILON
+            # orig_short = self.short_molecule.nick_signal + EPSILON
         else:
             long_signal = self.long_molecule.nick_signal + EPSILON
             short_signal = self.short_molecule.nick_signal + EPSILON
@@ -71,7 +76,7 @@ class CorrelationStruct:
                                                                                      short_signal,
                                                                                      step=0.001):
             if zoomed_signal.shape[0] > long_signal.shape[0]:
-                short_change = True
+                short_change = True 
                 _long = zoomed_signal
                 short = long_signal
             else:

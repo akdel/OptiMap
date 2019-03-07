@@ -1,5 +1,6 @@
 from OptiMap import *
 from OptiScan import database as db
+from scipy import ndimage
 """
 The class here is intended to store single OM molecule attributes.
 """
@@ -107,3 +108,16 @@ def create_molecule_stream_from_db(database_name: str, snr: float):
     conn = database.MoleculeConnector(database_name)
     molecule_stream = conn.yield_molecule_signals_in_all_runs()
     return yield_molecules_from_stream(molecule_stream, snr)
+
+
+def is_repeat(_mol):
+    result = ndimage.gaussian_filter1d(np.correlate(_mol, _mol[::-1], mode='same'), sigma=1.5)
+    mol_ = MoleculeNoBack(result, snr=1.5)
+    if len(mol_.nick_coordinates) < 6:
+        return False
+    nicks = np.array(mol_.nick_coordinates[0:6])
+    diffs = np.abs(nicks[:5]-nicks[1:6])
+    if (np.max(diffs) - np.min(diffs)) <= 2 and np.mean(diffs) >= 10:
+        return True
+    else:
+        return False
