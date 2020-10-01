@@ -1,0 +1,90 @@
+import fire
+from OptiMap.OptiSpeed import compression as comp
+from OptiMap.OptiSpeed import square_wave as sw
+import ray
+import typing as ty
+from OptiMap import correlation_struct as cs
+from OptiMap import molecule_struct as ms
+import enum
+
+
+class InputType(enum.Enum):
+    OptiMap = "optimap"
+    BNX = "bnx"
+    WrongType = "none"
+
+
+class OptiMapType(enum.Enum):
+    LogMolecule = "log"
+    RawMolecule = "raw"
+    SquareWaveMolecule = "square_wave"
+
+
+def compute_pairwise_deep(input_filename: str,
+                           output_filename: str = "out.tsv",
+                           molecule_type: str = "square_wave",
+                           first_score: float = 0.9,
+                           second_score: float = 0.75,
+                           combine_sparse: bool = False,
+                           number_of_threads: int = 4):
+    if first_score <= second_score:
+        from warnings import warn
+        warn("second score should be lower to have an effect", Warning)
+    if input_filename.endswith(".bnx"):
+        this_type = InputType.BNX
+    elif input_filename.endswith(".npy"):
+        this_type = InputType.OptiMap
+    else:
+        this_type = InputType.WrongType
+    if this_type == InputType.BNX:
+        molecule_array: comp.MoleculeArray = comp.CompressedAndScored.from_bnx_arrays(input_filename,
+                                                                                      min_label=10).to_molecule_array()
+    elif this_type == InputType.OptiMap:
+        import numpy as np
+        molecules: ty.List[ms.MoleculeNoBack] = [ms.MoleculeNoBack(raw_molecule, 3.) for raw_molecule in
+                                                 np.load(input_filename, allow_pickle=True)]
+        if molecule_type == "square_wave":
+            sq_waves: ty.List[sw.SquareWave] = [
+                sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=True).reform_wave_from_labels_with_width(13)
+                for i, molecule in enumerate(molecules)]
+            sq_waves += [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=True,
+                                                             reverse=True).reform_wave_from_labels_with_width(13) for
+                         i, molecule in enumerate(molecules)]
+        elif molecule_type == "log":
+            sq_waves: ty.List[sw.SquareWave] = [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=True) for
+                                                i, molecule in
+                                                enumerate(molecules)]
+            sq_waves += [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=True, reverse=True) for
+                         i, molecule in enumerate(molecules)]
+        elif molecule_type == "raw":
+            sq_waves: ty.List[sw.SquareWave] = [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=False) for
+                                                i, molecule in
+                                                enumerate(molecules)]
+            sq_waves += [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=False, reverse=True) for
+                         i, molecule in enumerate(molecules)]
+        else:
+            exit(1)
+        molecule_array: comp.MoleculeArray = comp.CompressedAndScored.from_waves(sq_waves).to_molecule_array()
+    else:
+        exit(1)
+
+    if not combine_sparse:
+        comp.OptiSpeedResults \
+            .from_molecule_array_all_vs_all(molecule_array)\
+            .to_all_correlation_results(molecule_array, thr=first_score)\
+            .transitive_closure(molecule_array, thr=second_score)\
+            .write_to_file(output_filename)
+    else:
+        comp.OptiSpeedResults \
+            .from_molecule_array_all_vs_all(molecule_array) \
+            .to_all_correlation_results(molecule_array, thr=first_score) \
+            .transitive_closure(molecule_array, thr=second_score) \
+            .pairs_to_sparse_correlation_results(molecule_array,
+                                                 thr=second_score,
+                                                 number_of_threads=number_of_threads,
+                                                 minimum_overlapping_labels=12)\
+            .write_to_file(output_filename)
+
+
+if __name__ == "__main__":
+    fire.Fire(compute_pairwise_deep)
