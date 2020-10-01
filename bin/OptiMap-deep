@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import fire
 from OptiMap.OptiSpeed import compression as comp
 from OptiMap.OptiSpeed import square_wave as sw
@@ -20,11 +22,16 @@ class OptiMapType(enum.Enum):
     SquareWaveMolecule = "square_wave"
 
 
-def compute_pairwise_naive(input_filename: str,
+def compute_pairwise_deep(input_filename: str,
                            output_filename: str = "out.tsv",
                            molecule_type: str = "square_wave",
-                           score: float = 0.9,
-                           min_overlap_length: int = 250):
+                           first_score: float = 0.9,
+                           second_score: float = 0.75,
+                           combine_sparse: bool = False,
+                           number_of_threads: int = 4):
+    if first_score <= second_score:
+        from warnings import warn
+        warn("second score should be lower to have an effect", Warning)
     if input_filename.endswith(".bnx"):
         this_type = InputType.BNX
     elif input_filename.endswith(".npy"):
@@ -63,11 +70,23 @@ def compute_pairwise_naive(input_filename: str,
     else:
         exit(1)
 
-    comp.OptiSpeedResults \
-        .from_molecule_array_all_vs_all(molecule_array) \
-        .to_all_correlation_results(molecule_array, thr=score, length_limit=min_overlap_length) \
-        .write_to_file(output_filename)
+    if not combine_sparse:
+        comp.OptiSpeedResults \
+            .from_molecule_array_all_vs_all(molecule_array)\
+            .to_all_correlation_results(molecule_array, thr=first_score)\
+            .transitive_closure(molecule_array, thr=second_score)\
+            .write_to_file(output_filename)
+    else:
+        comp.OptiSpeedResults \
+            .from_molecule_array_all_vs_all(molecule_array) \
+            .to_all_correlation_results(molecule_array, thr=first_score) \
+            .transitive_closure(molecule_array, thr=second_score) \
+            .pairs_to_sparse_correlation_results(molecule_array,
+                                                 thr=second_score,
+                                                 number_of_threads=number_of_threads,
+                                                 minimum_overlapping_labels=12)\
+            .write_to_file(output_filename)
 
 
 if __name__ == "__main__":
-    fire.Fire(compute_pairwise_naive)
+    fire.Fire(compute_pairwise_deep)

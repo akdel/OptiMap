@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
+
 import fire
+from OptiMap.OptiSpeed import compression as comp
+from OptiMap.OptiSpeed import square_wave as sw
+import ray
+import typing as ty
 from OptiMap import correlation_struct as cs
 from OptiMap import molecule_struct as ms
-from OptiMap.OptiSpeed import square_wave as sw
-from OptiMap.OptiSpeed import compression as comp
-import typing as ty
-import ray
 import enum
 
 
@@ -20,11 +22,11 @@ class OptiMapType(enum.Enum):
     SquareWaveMolecule = "square_wave"
 
 
-def compute_pairwise_sparse(input_filename: str, min_number_of_nicks: int = 12,
-                            molecule_type: str = "square_wave",
-                            output_filename: str = "out.tsv",
-                            number_of_threads: int = 4,
-                            score: float = 0.8):
+def compute_pairwise_naive(input_filename: str,
+                           output_filename: str = "out.tsv",
+                           molecule_type: str = "square_wave",
+                           score: float = 0.9,
+                           min_overlap_length: int = 250):
     if input_filename.endswith(".bnx"):
         this_type = InputType.BNX
     elif input_filename.endswith(".npy"):
@@ -64,13 +66,10 @@ def compute_pairwise_sparse(input_filename: str, min_number_of_nicks: int = 12,
         exit(1)
 
     comp.OptiSpeedResults \
-        .from_molecule_array_all_vs_all(molecule_array)\
-        .pairs_to_sparse_correlation_results(molecule_array,
-                                             number_of_threads=number_of_threads,
-                                             thr=score,
-                                             minimum_overlapping_labels=min_number_of_nicks)\
+        .from_molecule_array_all_vs_all(molecule_array) \
+        .to_all_correlation_results(molecule_array, thr=score, length_limit=min_overlap_length) \
         .write_to_file(output_filename)
 
 
 if __name__ == "__main__":
-    fire.Fire(compute_pairwise_sparse)
+    fire.Fire(compute_pairwise_naive)
