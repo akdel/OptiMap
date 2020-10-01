@@ -2,9 +2,10 @@ from distutils.core import setup
 
 setup(name='OptiMap',
       version='1.0',
-      description='Bionano Tiff to Optical Map Signals',
+      description='An optical map molecule alignment tool.',
       author='Mehmet Akdel',
       author_email='mehmet.akdel@wur.nl',
       url='https://gitlab.com/akdel/',
-      packages=['OptiMap'],
-      install_requires=["sqlalchemy", "numpy", "numba", "scipy", "intervaltree", "matplotlib", "cython"],)
+      packages=['OptiMap', "OptiMap/OptiSpeed"],
+      install_requires=["sqlalchemy", "numpy", "numba", "scipy", "intervaltree",
+                        "matplotlib", "cython", "Simple-LSH", "fire", "ray"])
