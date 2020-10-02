@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+
+import fire
+from OptiMap.OptiSpeed import compression as comp
+from OptiMap.OptiSpeed import square_wave as sw
+import ray
+import typing as ty
+from OptiMap import correlation_struct as cs
+from OptiMap import molecule_struct as ms
+import enum
+import numpy as np
+
+
+class InputType(enum.Enum):
+    OptiMap = "optimap"
+    BNX = "bnx"
+    WrongType = "none"
+
+
+class OptiMapType(enum.Enum):
+    LogMolecule = "log"
+    RawMolecule = "raw"
+    SquareWaveMolecule = "square_wave"
+
+
+def compute_pairwise_from_optispeed(input_filename: str,
+                                    output_filename: str = "mol.npy",
+                                    molecule_type: str = "square_wave",
+                                    first_score: float = 0.9,
+                                    second_score: float = 0.75,
+                                    denoise_coverage: int = 3,
+                                    number_of_threads: int = 4,
+                                    hamming_threshold: int = 3,
+                                    top_optispeed: int = 30,
+                                    optispeed_file: str = "optispeed_results.opt"):
+    if first_score <= second_score:
+        from warnings import warn
+        warn("second score should be lower to have an effect", Warning)
+    if input_filename.endswith(".bnx"):
+        this_type = InputType.BNX
+    elif input_filename.endswith(".npy"):
+        this_type = InputType.OptiMap
+    else:
+        this_type = InputType.WrongType
+    if this_type == InputType.BNX:
+        raise TypeError
+    elif this_type == InputType.OptiMap:
+        molecules: ty.List[ms.MoleculeNoBack] = [ms.MoleculeNoBack(raw_molecule, 3.) for raw_molecule in
+                                                 np.load(input_filename, allow_pickle=True)]
+        real_sq_waves: ty.List[sw.SquareWave] = [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=False) for
+                                                 i, molecule in
+                                                 enumerate(molecules)]
+        real_sq_waves += [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=False, reverse=True) for
+                          i, molecule in enumerate(molecules)]
+        real_molecule_array = comp.CompressedAndScored.from_waves(real_sq_waves, length=120,
+                                                                  segment_limit=(0.1,
+                                                                                 0.7)).to_molecule_array()
+        if molecule_type == "square_wave":
+            sq_waves: ty.List[sw.SquareWave] = [
+                sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=True).reform_wave_from_labels_with_width(13)
+                for i, molecule in enumerate(molecules)]
+            sq_waves += [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=True,
+                                                             reverse=True).reform_wave_from_labels_with_width(13) for
+                         i, molecule in enumerate(molecules)]
+        elif molecule_type == "log":
+            sq_waves: ty.List[sw.SquareWave] = [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=True) for
+                                                i, molecule in
+                                                enumerate(molecules)]
+            sq_waves += [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=True, reverse=True) for
+                         i, molecule in enumerate(molecules)]
+        elif molecule_type == "raw":
+            sq_waves: ty.List[sw.SquareWave] = [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=False) for
+                                                i, molecule in
+                                                enumerate(molecules)]
+            sq_waves += [sw.SquareWave.from_optimap_molecule(molecule, i + 1, log=False, reverse=True) for
+                         i, molecule in enumerate(molecules)]
+        else:
+            raise TypeError
+        compressed: comp.CompressedAndScored = comp.CompressedAndScored.from_waves(sq_waves, length=120,
+                                                                                   segment_limit=(0.1, 0.7))
+        compressed.run_optispeed_and_output_results(optispeed_file, match_score_threshold=0.,
+                                                    hamming_threshold=hamming_threshold, top=top_optispeed)
+        molecule_array: comp.MoleculeArray = compressed.to_molecule_array()
+    else:
+        exit(1)
+
+    molecule_array = comp.OptiSpeedResults \
+        .from_optispeed_results_file(optispeed_file) \
+        .to_all_correlation_results(molecule_array, thr=first_score) \
+        .transitive_closure(molecule_array, thr=second_score) \
+        .pairs_to_sparse_correlation_results(molecule_array,
+                                             thr=second_score,
+                                             number_of_threads=number_of_threads,
+                                             minimum_overlapping_labels=12) \
+        .denoise_all(real_molecule_array, min_coverage=denoise_coverage)
+    np.save(output_filename, np.array([x[molecule_array.lengths[i]] for (i, x) in molecule_array.molecule_array]))
+
+
+if __name__ == "__main__":
+    fire.Fire(compute_pairwise_from_optispeed)

@@ -382,7 +382,7 @@ class OptiSpeedResults:
             res += v
         return res
 
-    def denoise(self, mol_id: int, molecule_array: 'MoleculeArray'):
+    def denoise(self, mol_id: int, molecule_array: 'MoleculeArray') -> np.ndarray:
         this_id: int = molecule_array.molid_to_arrayindex[mol_id]
         this_len: int = molecule_array.lengths[this_id]
         this_mol: np.ndarray = np.zeros((1 + len(self.molecule_matches[mol_id]), this_len))
@@ -397,6 +397,28 @@ class OptiSpeedResults:
             if mol_id == match.this_mol and this_len >= (match.zoom * that_len):
                 this_mol[i][match.long_overlap[0]: match.long_overlap[1]] = ndimage.zoom(that_mol, match.zoom)[match.short_overlap[0]: match.short_overlap[1]]
         return this_mol
+
+    def denoise_all(self, molecule_array: 'MoleculeArray', min_coverage: int = 3) -> 'MoleculeArray':
+        denoised_array: np.ndarray = np.zeros(molecule_array.molecule_array.shape,
+                                              dtype=molecule_array.molecule_array.dtype)
+        for mol_id in molecule_array.molid_to_arrayindex.keys():
+            array_index: int = molecule_array.molid_to_arrayindex[mol_id]
+            if mol_id in self.molecule_matches:
+                median_array: np.ndarray = self.denoise(mol_id, molecule_array)
+                nan_sum: np.ndarray = np.nansum(median_array, axis=1)
+                if nan_sum[nan_sum == 0].shape[0] >= min_coverage:
+                    denoised_array[array_index, :molecule_array.lengths[array_index]] = np.nanmedian(median_array, axis=0)
+                else:
+                    denoised_array[array_index] = molecule_array.molecule_array[array_index]
+            else:
+                denoised_array[array_index] = molecule_array.molecule_array[array_index]
+        return MoleculeArray(denoised_array,
+                             molecule_array.molid_to_arrayindex,
+                             molecule_array.arrayindex_to_molid,
+                             molecule_array.lengths,
+                             molecule_array.labels)
+
+
 
 
 @dataclass
