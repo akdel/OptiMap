@@ -1,4 +1,4 @@
-# OptiMap - Optical-map moleculue alignment tool
+# OptiMap - Optical-map molecule alignment tool
 
 ## Requirements:
 
