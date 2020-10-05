@@ -75,7 +75,8 @@ class CompressedAndScored:
         pass
 
     @classmethod
-    def from_waves(cls, waves: ty.List[sw.SquareWave], nbits: int = 32, length: int = 250, segment_limit: ty.Tuple[float, float] = (0.25, 0.75)) -> "CompressedAndScored":
+    def from_waves(cls, waves: ty.List[sw.SquareWave], nbits: int = 32, length: int = 250,
+                   segment_limit: ty.Tuple[float, float] = (0.25, 0.75)) -> "CompressedAndScored":
         all_segments: ty.List[np.ndarray] = list()
         molecules: ty.List[CompressedMolecule] = list()
         segment_to_molecules: ty.Dict[SegmentHash, ty.List[MoleculeIndex]] = dict()
@@ -246,7 +247,7 @@ class OptiSpeedResults:
         current_id: int = molecule_array.molid_to_arrayindex[mol_id]
         signal: np.ndarray = molecule_array.molecule_array[current_id][: molecule_array.lengths[current_id]]
         res = align.get_filtered_alignments(signal,
-                                            molecule_array.molecule_array,
+                                            molecule_array.molecule_array, # change to epsilon
                                             molecule_array.lengths,
                                             matched_ids, limit=length_limit)
 

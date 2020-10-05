@@ -10,7 +10,7 @@ setup(name='OptiMap',
                "bin/OptiMap-naive",
                "bin/OptiMap-sparse",
                "bin/OptiSpeed",
-               "bin/OptiSpeed-polish"],
+               "bin/OptiSpeed-denoise"],
       packages=['OptiMap', "OptiMap/OptiSpeed"],
       install_requires=["sqlalchemy", "numpy", "numba", "scipy", "intervaltree",
                         "matplotlib", "cython", "Simple-LSH", "fire", "ray"])

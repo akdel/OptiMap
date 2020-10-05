@@ -84,6 +84,8 @@ def compute_pairwise_from_optispeed(input_filename: str,
     else:
         exit(1)
 
+    molecule_array.molecule_array += 0.0001
+
     molecule_array = comp.OptiSpeedResults \
         .from_optispeed_results_file(optispeed_file) \
         .to_all_correlation_results(molecule_array, thr=first_score) \

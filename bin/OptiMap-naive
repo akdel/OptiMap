@@ -65,6 +65,8 @@ def compute_pairwise_naive(input_filename: str,
     else:
         exit(1)
 
+    molecule_array.molecule_array += 0.0001
+
     comp.OptiSpeedResults \
         .from_molecule_array_all_vs_all(molecule_array) \
         .to_all_correlation_results(molecule_array, thr=score, length_limit=min_overlap_length) \

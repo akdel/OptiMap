@@ -65,6 +65,8 @@ def compute_pairwise_sparse(input_filename: str, min_number_of_nicks: int = 12,
     else:
         exit(1)
 
+    molecule_array.molecule_array += 0.0001
+
     comp.OptiSpeedResults \
         .from_molecule_array_all_vs_all(molecule_array)\
         .pairs_to_sparse_correlation_results(molecule_array,

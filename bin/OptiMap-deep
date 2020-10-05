@@ -70,6 +70,8 @@ def compute_pairwise_deep(input_filename: str,
     else:
         exit(1)
 
+    molecule_array.molecule_array += 0.0001
+
     if not combine_sparse:
         comp.OptiSpeedResults \
             .from_molecule_array_all_vs_all(molecule_array)\

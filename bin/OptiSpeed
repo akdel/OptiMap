@@ -81,6 +81,8 @@ def compute_pairwise_from_optispeed(input_filename: str,
     else:
         exit(1)
 
+    molecule_array.molecule_array += 0.0001
+
     if not combine_sparse:
         comp.OptiSpeedResults \
             .from_optispeed_results_file(optispeed_file)\
