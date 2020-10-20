@@ -13,4 +13,4 @@ setup(name='OptiMap',
                "bin/OptiSpeed-denoise"],
       packages=['OptiMap', "OptiMap/OptiSpeed"],
       install_requires=["sqlalchemy", "numpy", "numba", "scipy", "intervaltree",
-                        "matplotlib", "cython", "Simple-LSH", "fire", "ray"])
+                        "matplotlib", "cython", "Simple-LSH", "fire", "ray==0.8.6"])
