@@ -95,7 +95,7 @@ def compute_pairwise_from_optispeed(input_filename: str,
                                              number_of_threads=number_of_threads,
                                              minimum_overlapping_labels=12) \
         .denoise_all(real_molecule_array, min_coverage=denoise_coverage)
-    np.save(output_filename, np.array([x[molecule_array.lengths[i]] for (i, x) in enumerate(molecule_array.molecule_array)]))
+    np.save(output_filename, np.array([x[:molecule_array.lengths[i]] for (i, x) in enumerate(molecule_array.molecule_array)]))
 
 
 if __name__ == "__main__":
