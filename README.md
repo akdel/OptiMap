@@ -17,4 +17,5 @@ pip install .
 OptiSpeed ./data/molecules_test.bnx --first_score=0.8 --second_score=0.75 --output_filename=test_output.tsv --combine_sparse=True
 OptiSpeed-denoise ./data/molecules.npy --first_score=0.8 --second_score=0.75 --output_filename=denoised_molecules.npy
 OptiSpeed ./data/denoised_molecules.bnx --first_score=0.8 --second_score=0.75 --output_filename=test_output.tsv --combine_sparse=True
+
 ```
