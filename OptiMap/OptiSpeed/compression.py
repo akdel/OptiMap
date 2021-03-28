@@ -256,8 +256,9 @@ class OptiSpeedResults:
             if score >= thr:
                 orientation = True if molecule_array.arrayindex_to_molid[matched_id] > 0 else False
                 #TODO here put the longer molecule first
-                map_results.append(OptiSpeedResult(mol_id, molecule_array.arrayindex_to_molid[matched_id],
-                                                   (0, 0), orientation, score))
+                if mol_id > 0 and (mol_id != abs(molecule_array.arrayindex_to_molid[matched_id])):
+                    map_results.append(OptiSpeedResult(mol_id, molecule_array.arrayindex_to_molid[matched_id],
+                                                       (0, 0), orientation, score))
         return map_results
 
     def to_all_correlation_results(self, molecule_array: 'MoleculeArray',
@@ -284,7 +285,8 @@ class OptiSpeedResults:
                                             thr: float = 0.8,
                                             pairs: [None, ty.Set[ty.Tuple[int, int]]] = None,
                                             number_of_threads: int = 4,
-                                            minimum_overlapping_labels: int = 9) -> 'OptiSpeedResults':
+                                            minimum_overlapping_labels: ty[None, int] = 9,
+                                            by_length: ty.Union[None, int] = None) -> 'OptiSpeedResults':
         import ray
         if pairs is None:
             pairs: ty.Set[ty.Tuple[int, int]] = self.get_match_pairs()
@@ -325,8 +327,12 @@ class OptiSpeedResults:
                     length: int = molecule_array.lengths[array_id]
                     sq_wave: np.ndarray = molecule_array.molecule_array[array_id][:length]
                     mol_pair.append(make_molecule_struct_from_sq_wave(sq_wave, molecule_array.labels[array_id]))
-                yield cs.CorrelationStruct(mol_pair[0], mol_pair[1], minimum_nick_number=minimum_overlapping_labels,
-                                           return_new_signals=False), pair
+                if by_length is not None:
+                    yield cs.CorrelationStruct(mol_pair[0], mol_pair[1], minimum_nick_number=minimum_overlapping_labels,
+                                               return_new_signals=False), pair
+                else:
+                    yield cs.CorrelationStruct(mol_pair[0], mol_pair[1], bylength=by_length,
+                                               return_new_signals=False), pair
 
         ray.init(node_ip_address="0.0.0.0", num_cpus=number_of_threads)
         computed_alignments = [result for
