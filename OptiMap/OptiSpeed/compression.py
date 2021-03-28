@@ -285,7 +285,7 @@ class OptiSpeedResults:
                                             thr: float = 0.8,
                                             pairs: [None, ty.Set[ty.Tuple[int, int]]] = None,
                                             number_of_threads: int = 4,
-                                            minimum_overlapping_labels: ty[None, int] = 9,
+                                            minimum_overlapping_labels: ty.Union[None, int] = 9,
                                             by_length: ty.Union[None, int] = None) -> 'OptiSpeedResults':
         import ray
         if pairs is None:
@@ -327,7 +327,7 @@ class OptiSpeedResults:
                     length: int = molecule_array.lengths[array_id]
                     sq_wave: np.ndarray = molecule_array.molecule_array[array_id][:length]
                     mol_pair.append(make_molecule_struct_from_sq_wave(sq_wave, molecule_array.labels[array_id]))
-                if by_length is not None:
+                if by_length is None:
                     yield cs.CorrelationStruct(mol_pair[0], mol_pair[1], minimum_nick_number=minimum_overlapping_labels,
                                                return_new_signals=False), pair
                 else:
