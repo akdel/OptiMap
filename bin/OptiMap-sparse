@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 import fire
 from OptiMap import correlation_struct as cs
