@@ -334,7 +334,7 @@ class OptiSpeedResults:
                     yield cs.CorrelationStruct(mol_pair[0], mol_pair[1], bylength=by_length,
                                                return_new_signals=False), pair
 
-        ray.init(node_ip_address="0.0.0.0", num_cpus=number_of_threads)
+        ray.init(_node_ip_address="0.0.0.0", num_cpus=number_of_threads)
         computed_alignments = [result for
                                result
                                in ray.get(
