@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import fire
 from OptiMap.OptiSpeed import compression as comp
 from OptiMap.OptiSpeed import square_wave as sw
